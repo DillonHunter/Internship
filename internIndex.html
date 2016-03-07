@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
    <head>
-    <meta charset="utf-8" />
+   <meta charset="utf-8" />
     <title>Index - Dillon Hunter</title>
 
         <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react.js"></script>
+  <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-dom.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
@@ -15,9 +15,20 @@
     <script type="text/javascript" src="assets/js/skel.min.js"></script>
     <script type="text/javascript" src="assets/js/skel-viewport.min.js"></script>
     <script type="text/javascript" src="assets/js/util.js"></script>
-    <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+    <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]--> -->
     <script type="text/javascript" src="assets/js/main.js"></script>
     <script type="text/javascript" src="js/script_file.js"></script>
+   <!-- <script type="text/babel" src="test.js"></script> -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+   
+    
+    <script src="https://fb.me/react-0.14.2.js"></script>
+    <script src="https://fb.me/react-dom-0.14.2.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+
+
 
     <link rel="stylesheet" href="assets/css/main.css" />
   </head>
@@ -28,9 +39,9 @@
             <div class="12u">
 
               <header id="header">
-                <h1><a href="#" id="logo">Test</a></h1>
+                <h1><a href="internIndex.html" id="logo">Test</a></h1>
                 <nav id="nav">
-                  <a href="index.html" class="current-page-item">Index</a>
+                  <a href="internIndex.html" class="current-page-item">Index</a>
                 </nav>
               </header>
 
@@ -44,7 +55,151 @@
             <div class="4u 12u(mobile)">
               <h2>Welcome!</h2>
               <div id="content"></div>
-                <script type="text/babel" src="test.js"></script>
+              <div id="reactMovieSearchComponent"></div>
+                <script type="text/babel">
+                  var MovieDetails = React.createClass({
+                    render: function() {
+                      return (
+                          <div>
+                            <div>{this.props.requestError}</div>
+                            <div>
+                              <img src={this.props.moviePoster} width="150"/>
+                            </div>
+                            <div>
+                              <h3 className="movie-title">{this.props.movieTitle}</h3>
+                              <p className="movie-plot">{this.props.moviePlot}</p>
+                              <span className="movie-year">{this.props.movieYear}</span>
+                            </div>
+                          </div>
+                      )
+                    }
+                  });
+                  var MovieSearchResults = React.createClass({
+                    render: function() {
+                      return (
+                          <MovieDetails
+                            requestError={this.props.requestError}
+                            movieTitle={this.props.movieTitle}
+                            moviePoster={this.props.moviePoster}
+                            moviePlot={this.props.moviePlot}
+                            movieYear={this.props.movieYear}
+                            source={this.props.source}
+                            filterText={this.props.filterText}
+                          />
+                      );
+                    }
+                  });
+                  var MovieSearchForm = React.createClass({
+                    handleChange: function() {
+                        this.props.onUserInput(
+                            this.refs.filterTextInput.value
+                        );
+                    },
+                    submit: function(e) {
+                      e.preventDefault();
+                      this.props.onFormSubmit(
+                          this.refs.filterTextInput.value
+                      );
+                    },
+                    render: function() {
+                      return (
+                        <form id="movieSearchForm" onSubmit={this.submit}>
+                          <div>
+                              <input
+                                type="text"
+                                name="movie"
+                                placeholder="Movie title"
+                                className="form-control"
+                                value={this.props.filterText}
+                                ref="filterTextInput"
+                                onChange={this.handleChange}
+                              />
+                              <span>
+                                <button>Search</button>
+                              </span>
+                          </div>
+                        </form>
+                      );
+                    }
+                  });
+                  var SearchableOMDB = React.createClass({
+                    getInitialState: function() {
+                        return {
+                            filterText: '',
+                            requestError: '',
+                            movieTitle: '',
+                            moviePoster: '',
+                            moviePlot: '',
+                            movieYear: ''
+                        };
+                    },
+                    handleUserInput: function(filterText) {
+                        this.setState({
+                            filterText: filterText
+                        });
+                    },
+                    fetchJSONFile: function(path, callback) {
+                        var httpRequest = new XMLHttpRequest();
+                        httpRequest.onreadystatechange = function() {
+                            if (httpRequest.readyState === 4) {
+                                if (httpRequest.status === 200) {
+                                    var data = JSON.parse(httpRequest.responseText);
+                                    if (callback) callback(data);
+                                } else {
+                                    var data = JSON.parse(httpRequest.statusText);
+                                    if (callback) callback(data); 
+                                }
+                            }
+                        };
+                        httpRequest.open('GET', path);
+                        httpRequest.send(); 
+                    },
+                    getMovieDetails: function(filterText) {
+                      this.fetchJSONFile(this.props.source +'?t='+ filterText +'&type=movie&tomatoes=true', function(result){
+                        // use data
+                        this.setState({
+                            requestError: result.Error,
+                            movieTitle: result.Title,
+                            moviePoster: result.Poster,
+                            moviePlot: result.Plot,
+                            movieYear: result.Year
+                        });
+                      }.bind(this));
+                    },
+                    render: function() {
+                      return (
+                        <div>
+                          <MovieSearchForm
+                            filterText={this.state.filterText}
+                            onUserInput={this.handleUserInput}
+                            onFormSubmit={this.getMovieDetails}
+                            source={this.props.source}
+                            requestError={this.state.requestError}
+                            movieTitle={this.state.movieTitle}
+                            moviePoster={this.state.moviePoster}
+                            moviePlot={this.state.moviePlot}
+                            movieYear={this.state.movieYear}
+                          />
+                          <hr />
+                          <MovieSearchResults
+                            filterText={this.state.filterText}
+                            source={this.props.source}
+                            requestError={this.state.requestError}
+                            movieTitle={this.state.movieTitle}
+                            moviePoster={this.state.moviePoster}
+                            moviePlot={this.state.moviePlot}
+                            movieYear={this.state.movieYear}
+
+                          />
+                        </div>
+                      );
+                    }
+                  });
+                  ReactDOM.render(
+                    <SearchableOMDB source="http://www.omdbapi.com/" />, document.getElementById('reactMovieSearchComponent')
+                  );
+
+                </script>
 
                 <div id="container" class="box" />
                 <div id="myDiv" class="box" />

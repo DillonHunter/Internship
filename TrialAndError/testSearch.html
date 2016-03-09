@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>React Movie Search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
+    
+    <script src="https://fb.me/react-0.14.2.js"></script>
+    <script src="https://fb.me/react-dom-0.14.2.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+          <div class="page-header">
+            <h1>React Movie Search</h1>
+          </div>
+
+          <div id="reactMovieSearchComponent"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/babel">
+      var MovieDetails = React.createClass({
+        render: function() {
+          return (
+              <div className="movie-details media">
+                <div className={this.props.requestError ? "alert alert-danger" : "hide" }>{this.props.requestError}</div>
+                <div className="movie-poster media-left">
+                  <img src={this.props.moviePoster} width="150" className={this.props.moviePoster ? "media-object" : "hide" } />
+                </div>
+                <div className="media-body">
+                  <h3 className="movie-title">{this.props.movieTitle}</h3>
+                  <p className="movie-plot">{this.props.moviePlot}</p>
+                  <span className="movie-year">{this.props.movieYear}</span>
+                </div>
+              </div>
+          )
+        }
+      });
+      var MovieSearchResults = React.createClass({
+        render: function() {
+          return (
+            <div id="movieSearchResults" className="movie-results">
+              <MovieDetails
+                requestError={this.props.requestError}
+                movieTitle={this.props.movieTitle}
+                moviePoster={this.props.moviePoster}
+                moviePlot={this.props.moviePlot}
+                movieYear={this.props.movieYear}
+                source={this.props.source}
+                filterText={this.props.filterText}
+              />
+            </div>
+          );
+        }
+      });
+      var MovieSearchForm = React.createClass({
+        handleChange: function() {
+            this.props.onUserInput(
+                this.refs.filterTextInput.value
+            );
+        },
+        submit: function(e) {
+          e.preventDefault();
+          this.props.onFormSubmit(
+              this.refs.filterTextInput.value
+          );
+        },
+        render: function() {
+          return (
+            <form id="movieSearchForm" className="movie-search-bar" onSubmit={this.submit}>
+              <div className="input-group">
+                <label className="sr-only">Movie title</label>
+                  <input
+                    type="text"
+                    name="movie"
+                    placeholder="Movie title"
+                    className="form-control"
+                    value={this.props.filterText}
+                    ref="filterTextInput"
+                    onChange={this.handleChange}
+                  />
+                  <span className="input-group-btn">
+                    <button className="btn btn-default" >Go!</button>
+                  </span>
+              </div>
+            </form>
+          );
+        }
+      });
+      var SearchableOMDB = React.createClass({
+        getInitialState: function() {
+            return {
+                filterText: '',
+                requestError: '',
+                movieTitle: '',
+                moviePoster: '',
+                moviePlot: '',
+                movieYear: ''
+            };
+        },
+        handleUserInput: function(filterText) {
+            this.setState({
+                filterText: filterText
+            });
+        },
+        fetchJSONFile: function(path, callback) {
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function() {
+                if (httpRequest.readyState === 4) {
+                    if (httpRequest.status === 200) {
+                        var data = JSON.parse(httpRequest.responseText);
+                        if (callback) callback(data);
+                    } else {
+                        var data = JSON.parse(httpRequest.statusText);
+                        if (callback) callback(data); 
+                    }
+                }
+            };
+            httpRequest.open('GET', path);
+            httpRequest.send(); 
+        },
+        getMovieDetails: function(filterText) {
+          this.fetchJSONFile(this.props.source +'?t='+ filterText +'&type=movie&tomatoes=true', function(result){
+            // do something with your data
+            this.setState({
+                requestError: result.Error,
+                movieTitle: result.Title,
+                moviePoster: result.Poster,
+                moviePlot: result.Plot,
+                movieYear: result.Year
+            });
+          }.bind(this));
+        },
+        render: function() {
+          return (
+            <div id="searchableOMDB" className="searchable well well-lg">
+              <MovieSearchForm
+                filterText={this.state.filterText}
+                onUserInput={this.handleUserInput}
+                onFormSubmit={this.getMovieDetails}
+                source={this.props.source}
+                requestError={this.state.requestError}
+                movieTitle={this.state.movieTitle}
+                moviePoster={this.state.moviePoster}
+                moviePlot={this.state.moviePlot}
+                movieYear={this.state.movieYear}
+              />
+              <hr />
+              <MovieSearchResults
+                filterText={this.state.filterText}
+                source={this.props.source}
+                requestError={this.state.requestError}
+                movieTitle={this.state.movieTitle}
+                moviePoster={this.state.moviePoster}
+                moviePlot={this.state.moviePlot}
+                movieYear={this.state.movieYear}
+
+              />
+            </div>
+          );
+        }
+      });
+      ReactDOM.render(
+        <SearchableOMDB source="http://www.omdbapi.com/" />, document.getElementById('reactMovieSearchComponent')
+      );
+
+    </script>
+
+  </body>
+</html>

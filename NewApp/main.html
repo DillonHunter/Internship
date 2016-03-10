@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+   <head>
+   <meta charset="utf-8" />
+    <title>Index - Dillon Hunter</title>
+
+        <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+
+
+    <script type="text/javascript" src="assets/js/skel.min.js"></script>
+    <script type="text/javascript" src="assets/js/skel-viewport.min.js"></script>
+    <script type="text/javascript" src="assets/js/util.js"></script>
+    <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+    <script type="text/javascript" src="assets/js/main.js"></script>
+    <script type="text/javascript" src="js/script_file.js"></script>
+   <!-- <script type="text/babel" src="test.js"></script> -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+   
+    <script type="text/javascript" src="assets/js/jquery.min.js"></script>
+    <script src="https://fb.me/react-0.14.2.js"></script>
+    <script src="https://fb.me/react-dom-0.14.2.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+
+
+
+    <link rel="stylesheet" href="assets/css/main.css" />
+  </head>
+  <body>
+    <div id="header-wrapper">
+        <div class="container">
+          <div class="row">
+            <div class="12u">
+
+              <header id="header">
+                <h1><a href="internIndex.html" id="logo">Test</a></h1>
+                <nav id="nav">
+                  <a href="internIndex.html" class="current-page-item">Index</a>
+                </nav>
+              </header>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    <div id="main">
+      <div class="container">
+          <div class="row main-row">
+            <div class="4u 12u(mobile)">
+              <h2>Welcome!</h2>
+              <div id="content"></div>
+              <div id="reactMovieSearchComponent"></div>
+              <script type="text/babel">
+                  var SearchGames = React.createClass({
+
+                  getInitialState: function(){
+                      return { 
+                      searchedValue: '',
+                      total: 0,
+                      active: false
+                      };
+                  },
+
+                  textChanged: function(e){
+
+                      this.setState({searchedValue:e.target.value});
+                  },
+
+                  addTotal: function( price ){
+                      this.setState( { total: this.state.total + price } );
+                  },
+
+                  render: function() {
+                      var self = this;
+
+                      var games = this.props.items,
+                          searchedValue = this.state.searchedValue.trim().toLowerCase();
+
+                      var handle = this.props.items.map(function(h){
+
+                          return <Game name={h.name} price={h.price} url={h.url} active={h.active} addTotal={self.addTotal} />;
+                      });
+                      if(searchedValue.length > 0){
+
+                          games = games.filter(function(g){
+                              return g.name.toLowerCase().match( searchedValue );
+                          });
+
+                      }
+
+                      return <div id="handle">
+
+                              <input type="text" value={this.state.searchedValue} onChange={this.textChanged} placeholder="Search Games" />
+                                                      {handle}
+
+
+                              <p id="total">Total <b>${this.state.total.toFixed(2)}</b></p>
+
+                          </div>;
+
+
+                      }
+                  });
+
+                  var Game = React.createClass({
+
+                    getInitialState: function(){
+                        return { active: false };
+                    },
+
+                    clickHandler: function (){
+
+                        var active = !this.state.active;
+
+                        this.setState({ active: active });
+                        
+                        this.props.addTotal( active ? this.props.price : -this.props.price );
+
+                    },
+
+                    render: function(){
+
+                        return  <p className={ this.state.active ? 'active' : '' } onClick={this.clickHandler}>
+                                    {this.props.name} <a href={this.props.url}>{this.props.url}</a> <b>${this.props.price.toFixed(2)}</b>
+                                </p>;
+
+                    }
+                  });
+                                                                                                                                                        
+              var games = [
+
+                  { name: 'XCOM 2', url: 'http://store.steampowered.com/app/268500', price: 79.99 },
+                  { name: 'Grand Theft Auto V', url: 'http://store.steampowered.com/agecheck/app/271590/', price: 69.99 },
+                  { name: 'Hotline Miami 2: Wrong Number', url: 'http://store.steampowered.com/agecheck/app/274170/', price: 16.99 },
+                  { name: 'Gang Beasts', url: 'http://store.steampowered.com/app/285900', price: 21.99 }
+              ];
+
+              ReactDOM.render(
+                  <SearchGames items={ games } />,
+                  document.getElementById('content')
+              );
+
+              </script>
+
+              <div id="container" class="box" />
+              <div id="myDiv" class="box" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

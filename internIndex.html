@@ -74,6 +74,15 @@
                       )
                     }
                   });
+                  var WatchlistControl = React.createClass({
+                    render: function(){
+                      <SearchableOMDB clickHandler={this.addToWatchlist} />;
+                    },
+                    addToWatchlist: function( title ){
+                    {console.log(this.state.movieTitle)}
+                      this.setState( { watchlist: this.state.watchlist + title } );
+                    }
+                  });
                   var MovieSearchResults = React.createClass({
                     render: function() {
                       return (
@@ -130,7 +139,8 @@
                             movieTitle: '',
                             moviePoster: '',
                             moviePlot: '',
-                            movieYear: ''
+                            movieYear: '',
+                            watchlist: 'something'
                         };
                     },
                     handleUserInput: function(filterText) {
@@ -162,10 +172,13 @@
                             movieTitle: result.Title,
                             moviePoster: result.Poster,
                             moviePlot: result.Plot,
-                            movieYear: result.Year
+                            movieYear: result.Year,
+                        //  watchlist: result.Title
                         });
                       }.bind(this));
                     },
+
+
                     render: function() {
                       return (
                         <div>
@@ -189,14 +202,16 @@
                             moviePoster={this.state.moviePoster}
                             moviePlot={this.state.moviePlot}
                             movieYear={this.state.movieYear}
-
                           />
+                          {console.log(this.state.movieTitle)}
+                          <input type="button" onClick={this.props.clickHandler} value="Add to Watchlist" />
+                          <p id="watchlist">Watchlist: <b>{this.state.watchlist}</b></p>
                         </div>
                       );
                     }
                   });
                   ReactDOM.render(
-                    <SearchableOMDB source="http://www.omdbapi.com/" />, document.getElementById('reactMovieSearchComponent')
+                    <SearchableOMDB source="http://www.omdbapi.com/"  />, document.getElementById('reactMovieSearchComponent')
                   );
 
                 </script>
